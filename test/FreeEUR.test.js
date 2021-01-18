@@ -58,6 +58,9 @@ contract("FreeStablecoin", accounts => {
         value: ether(ethValue)
       });
 
+      // gas used: 105810
+      // console.log("Gas used (mintStablecoin): " + mint.receipt.gasUsed);
+
       expectEvent(mint, "Transfer", {
         from: constants.ZERO_ADDRESS,
         to: accounts[0],
@@ -80,6 +83,9 @@ contract("FreeStablecoin", accounts => {
         from: accounts[0],
         value: ether(ethValue)
       });
+
+      // gas used: 106249
+      // console.log("Gas used (mintStablecoinFor): " + mint.receipt.gasUsed);
 
       expectEvent(mint, "Transfer", {
         from: constants.ZERO_ADDRESS,

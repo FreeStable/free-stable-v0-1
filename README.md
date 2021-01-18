@@ -15,11 +15,11 @@ Note that the amount of locked collateral **does not decrease** with the collate
 
 ## Potential design changes
 
-### Minting ratio bigger than 100%
+### Minting ratio bigger than 1
 
-In this example, the minted stablecoin value is the same as the collateral value (1:1, or 100% ratio). It needs to be researched whether this may be a subject of an economic attack (especially if the burning fee is set to 0).
+In this example, the minted stablecoin value is the same as the collateral value (1:1). It needs to be researched whether this may be a subject of an economic attack (especially if the burning fee is set to 0).
 
-In case this presents a problem, a minting ratio bigger than 100% could be introduced.
+In case this presents a problem, a minting ratio bigger than 1 could be introduced (maybe 1.1).
 
 ## TODO
 
