@@ -81,22 +81,25 @@ contract FreeStablecoin is ERC20, Ownable {
 
     // check if msg.sender has enough stablecoins
     uint senderBalance = balanceOf(_msgSender());
+    uint debt = getDebtAmount(_beneficiary);
 
     if (senderBalance == 0) {
       revert("Sender's token balance is 0."); // if msg.sender has 0 stablecoins, revert
     } else if (senderBalance < _stablecoinAmount) {
       _stablecoinAmount = senderBalance; // balance is less than specified amount, reduce the _stablecoinAmount
+    } else if (debt < _stablecoinAmount) {
+      _stablecoinAmount = debt; // debt is lower than specified stablecoin amount, so reduce the _stablecoinAmount
     }
 
     // calculate the percentage of burned stablecoins in debt: (_stablecoinAmount / debt) * collateral
-    uint ratio = (_stablecoinAmount.mul(100)).div(getDebtAmount(_beneficiary));
+    uint ratio = (_stablecoinAmount.mul(100)).div(debt);
     uint ethUnlocked = (ratio.mul(getCollateralAmount(_beneficiary))).div(100);
 
     // calculate the burn fee and reduce the amount of ETH to be returned
     uint burnFee = ethUnlocked.mul(burnFeePercentage).div(100);
 
-    // stablecoin burn
-    _burn(_beneficiary, _stablecoinAmount);
+    // burn stablecoins that below to msg.sender (not the beneficiary!!!)
+    _burn(_msgSender(), _stablecoinAmount);
 
     // reduce the collateral and stablecoin amounts in Vault
     vaults[_beneficiary].ethLocked = vaults[_beneficiary].ethLocked.sub(ethUnlocked);
