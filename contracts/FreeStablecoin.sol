@@ -40,7 +40,7 @@ contract FreeStablecoin is ERC20, Ownable {
 
   // PUBLIC (state changing)
   function mintStablecoin() payable public returns(bool) {
-    _mintStablecoin(msg.value, msg.sender);
+    _mintStablecoin(msg.value, _msgSender());
     return true;
   }
 
@@ -49,9 +49,15 @@ contract FreeStablecoin is ERC20, Ownable {
     return true;
   }
 
-  // function burnStablecoin() public returns(bool) {}
+  function burnStablecoin(uint stablecoinAmount) public returns(bool) {
+    _burnStablecoin(stablecoinAmount, _msgSender());
+    return true;
+  }
   
-  // function burnStablecoinFor(address beneficiary) public returns(bool) {}
+  function burnStablecoinFor(uint stablecoinAmount, address beneficiary) public returns(bool) {
+    _burnStablecoin(stablecoinAmount, beneficiary);
+    return true;
+  }
 
   function getEthPrice() public returns(uint) {
     // gets current ETH price from an oracle
@@ -69,9 +75,39 @@ contract FreeStablecoin is ERC20, Ownable {
     vaults[_beneficiary] = Vault(_ethAmount, stablecoinAmount);
   }
 
-  // function _burnStablecoin(uint ethAmount, address beneficiary) internal {}
-    // burn fee should be taken in ETH (not in the stablecoin!)
-    // prevent burn if collateralization ratio below threshold
+  function _burnStablecoin(uint _stablecoinAmount, address _beneficiary) internal {
+    require(_stablecoinAmount > 0);
+    require(_beneficiary != address(0));
+
+    // check if msg.sender has enough stablecoins
+    uint senderBalance = balanceOf(_msgSender());
+
+    if (senderBalance == 0) {
+      revert("Sender's token balance is 0."); // if msg.sender has 0 stablecoins, revert
+    } else if (senderBalance < _stablecoinAmount) {
+      _stablecoinAmount = senderBalance; // balance is less than specified amount, reduce the _stablecoinAmount
+    }
+
+    // calculate the percentage of burned stablecoins in debt: (_stablecoinAmount / debt) * collateral
+    uint ratio = (_stablecoinAmount.mul(100)).div(getDebtAmount(_beneficiary));
+    uint ethUnlocked = (ratio.mul(getCollateralAmount(_beneficiary))).div(100);
+
+    // calculate the burn fee and reduce the amount of ETH to be returned
+    uint burnFee = ethUnlocked.mul(burnFeePercentage).div(100);
+
+    // stablecoin burn
+    _burn(_beneficiary, _stablecoinAmount);
+
+    // reduce the collateral and stablecoin amounts in Vault
+    vaults[_beneficiary].ethLocked = vaults[_beneficiary].ethLocked.sub(ethUnlocked);
+    vaults[_beneficiary].stablecoinsMinted = vaults[_beneficiary].stablecoinsMinted.sub(_stablecoinAmount);
+
+    // send the burn fee in ETH to the owner/governance address
+    payable(owner()).transfer(burnFee);
+
+    // return the unlocked ETH to beneficiary (minus the burn fee)
+    payable(_beneficiary).transfer(ethUnlocked.sub(burnFee));
+  }
 
   // GOVERNANCE
 
@@ -81,11 +117,11 @@ contract FreeStablecoin is ERC20, Ownable {
 
   // RECEIVE & FALLBACK
   receive() external payable { 
-    _mintStablecoin(msg.value, msg.sender);
+    _mintStablecoin(msg.value, _msgSender());
   }
 
   fallback() external payable {
-    _mintStablecoin(msg.value, msg.sender);
+    _mintStablecoin(msg.value, _msgSender());
   }
 
 }
