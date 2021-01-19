@@ -162,10 +162,10 @@ contract("FreeStablecoin", accounts => {
       assert.approximately(
         Number(ethBalanceGovernanceAfter)-Number(ethBalanceGovernanceBefore), 
         Number(burnFeeTotal),
-        Number(1000000));
+        Number(10000000));
     });
 
-    it("burns all the rest of the sender's stablecoins", async () => {
+    it("burns the rest of the sender's stablecoins", async () => {
       const ethBalanceBefore = await web3.eth.getBalance(sender);
 
       const stablecoinBalanceBefore = await instance.balanceOf(sender);
@@ -350,11 +350,52 @@ contract("FreeStablecoin", accounts => {
   });
 
   describe("Governance", () => {
-    xit("", async () => {});
-    xit("", async () => {});
-    xit("", async () => {});
-    xit("", async () => {});
-    xit("", async () => {});
+    it("changes burn fee percentage", async () => {
+      const burnFeeBefore = await instance.getBurnPercentage();
+      assert.equal(burnFeeBefore, 1);
+
+      let changeFee = await instance.changeBurnFeePercentage(2, {from: governance});
+
+      expectEvent(changeFee, "BurnFeeChange", {
+        _from: governance,
+        _fee: "2"
+      });
+
+      const burnFeeAfter = await instance.getBurnPercentage();
+      assert.equal(burnFeeAfter, 2);
+    });
+
+    it("prevents non-owner account from changing the burn fee", async () => {
+      const burnFeeBefore = await instance.getBurnPercentage();
+      assert.equal(burnFeeBefore, 2);
+
+      await expectRevert(
+        instance.changeBurnFeePercentage(13, {from: sender}), // sender is not owner!
+        "caller is not the owner"
+      ) 
+
+      const burnFeeAfter = await instance.getBurnPercentage();
+      assert.equal(burnFeeAfter, 2);
+    });
+
+    it("changes the oracle address", async () => {
+      // let's use accounts[5] as the dummy new oracle address
+      const oracle = accounts[5];
+
+      let changeOracle = await instance.changeOracleAddress(oracle, {from: governance});
+
+      expectEvent(changeOracle, "OracleChange", {
+        _from: governance,
+        _oracle: oracle
+      });
+    });
+
+    it("prevents non-owner account from changing the oracle address", async () => {
+      await expectRevert(
+        instance.changeOracleAddress(accounts[7], {from: sender}), // sender is not owner!
+        "caller is not the owner"
+      ) 
+    });
   });
 
 });

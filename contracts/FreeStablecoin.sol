@@ -21,6 +21,8 @@ contract FreeStablecoin is ERC20, Ownable {
   mapping (address => Vault) private vaults;
 
   // EVENTS
+  event BurnFeeChange(address indexed _from, uint _fee);
+  event OracleChange(address indexed _from, address indexed _oracle);
   
   // CONSTRUCTOR
   constructor(string memory name_, string memory symbol_) ERC20(name_, symbol_) {}
@@ -114,9 +116,17 @@ contract FreeStablecoin is ERC20, Ownable {
 
   // GOVERNANCE
 
-  // function changeBurnFeePercentage() public onlyOwner returns(bool) {}
+  function changeBurnFeePercentage(uint _burnFeePercentage) public onlyOwner returns(bool) {
+    burnFeePercentage = _burnFeePercentage;
+    emit BurnFeeChange(_msgSender(), _burnFeePercentage);
+    return true;
+  }
 
-  // function changeOracleAddress() public onlyOwner returns(bool) {}
+  function changeOracleAddress(address oracle_) public onlyOwner returns(bool) {
+    oracle = oracle_;
+    emit OracleChange(_msgSender(), oracle_);
+    return true;
+  }
 
   // RECEIVE & FALLBACK
   receive() external payable { 
