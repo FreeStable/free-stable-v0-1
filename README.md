@@ -15,6 +15,17 @@ Note that the amount of locked collateral **does not decrease** with the collate
 
 ## Potential design changes
 
+### Delayed liquidations
+
+A new field can be added to the Vault: `lastDebtRepayment` (timestamp). The first time this is added is when the Vault was created (although it **probably** shouldn't be updated with future mints, unless the Vault was empty before). 
+
+So the timestamp should be added under one of two conditions:
+
+- The previous debt value was 0.
+- The user has burned some stablecoin (reduced debt).
+
+If the user hasn't reduced their debt for over a certain period of time (for example over 2 years), then s/he can be liquidated.
+
 ### Minting ratio bigger than 1
 
 In this example, the minted stablecoin value is the same as the collateral value (1:1). It needs to be researched whether this may be a subject of an economic attack (especially if the burning fee is set to 0).
