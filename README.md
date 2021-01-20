@@ -33,6 +33,18 @@ How to calculate the final price?
 
 Pick the lowest price (which gives you the least amount of stablecoins for your ETH), because this one is the safest to use (even though it may be well below the market price - in this case is like having a minting ratio above 1, so no big deal).
 
+## FAQ
+
+### Why aren't liquidations possible? Wouldn't that hurt the peg?
+
+The peg holds if people who are buying/selling the stablecoin believe that the peg is real. The experience with stablecoins so far has shown that (see USDT).
+
+Besides the common belief into the peg, the basic supply & demand also affect the peg. Even if a person believes that a FreeEUR stablecoin should be worth 1 EUR, they might pay more for it if there's too little supply on the market.
+
+Hence there's a need for a mechanism that motivates minters to mint stablecoins in times of a bigger demand. One mechanism is completely natural - a higher market price. But there's also another mechanism - increasing the burn fee, which would discourage minters from reducing the stablecoin supply.
+
+A potential additional mechanism could be rewarding minters with governance tokens.
+
 ## TODO
 
 - OracleBroker contract
