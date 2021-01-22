@@ -60,6 +60,6 @@ A potential additional mechanism could be rewarding minters with governance toke
 
 - OracleBroker contract
 - update the getEthPrice() method
-- change `burnFeePercentage` to `burnFeePercentageCents` (in this case 1% would be 100). This would allow to have smaller burn fee increases/decreases.
+- change `burnFeePercentage` to `burnFeeBps` (basis points, 1 = 0.01%). This would allow to have smaller burn fee increases/decreases.
 - front-end implementation
 - testnet deployment (Vercel?)
